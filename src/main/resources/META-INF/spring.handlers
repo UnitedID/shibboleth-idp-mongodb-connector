@@ -1,0 +1,1 @@
+http\://dev\.unitedid\.org/NS/mongodb-connector = org.unitedid.shibboleth.config.attribute.resolver.dataConnector.UIDDataConnectorNamespaceHandler

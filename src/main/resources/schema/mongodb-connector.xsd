@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema targetNamespace="http://dev.unitedid.org/NS/mongodb-connector" xmlns="http://www.w3.org/2001/XMLSchema"
+        xmlns:uid="http://dev.unitedid.org/NS/mongodb-connector"
+        xmlns:resolver="urn:mace:shibboleth:2.0:resolver"
+        xmlns:dc="urn:mace:shibboleth:2.0:resolver:dc"
+        elementFormDefault="qualified">
+
+    <import namespace="urn:mace:shibboleth:2.0:resolver"
+        schemaLocation="classpath:/schema/shibboleth-2.0-attribute-resolver.xsd" />
+
+    <import namespace="urn:mace:shibboleth:2.0:resolver:dc"
+        schemaLocation="classpath:/schema/shibboleth-2.0-attribute-resolver-dc.xsd" />
+
+    <annotation>
+        <documentation>
+            This schema specifies the configuration additions for MongoDB connector plugins
+        </documentation>
+    </annotation>
+
+    <complexType name="MongoDbDataConnector">
+        <annotation>
+            <documentation>
+               A data connector that pull information from a Mongo database.
+            </documentation>
+        </annotation>
+        <complexContent>
+            <extension base="resolver:BaseDataConnectorType">
+                <sequence>
+                    <element ref="uid:MongoHost" minOccurs="1" maxOccurs="unbounded" />
+                    <element name="QueryTemplate" type="string">
+                        <annotation>
+                            <documentation>
+                                A template used to construct a query to the mongo database.
+                            </documentation>
+                        </annotation>
+                    </element>
+                    <element ref="uid:Key" minOccurs="0" maxOccurs="unbounded" />
+                </sequence>
+                <attribute name="mongoDbName" type="string" use="required">
+                    <annotation>
+                        <documentation>
+                            The database to use.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="mongoCollection" type="string" use="required">
+                    <annotation>
+                        <documentation>
+                            The collection to query.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="mongoUser" type="string">
+                    <annotation>
+                        <documentation>
+                            The username to use when connecting to the mongo database server.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="mongoPassword" type="string">
+                    <annotation>
+                        <documentation>
+                            The password to use when connecting to the mongo database server.
+                        </documentation>
+                    </annotation>
+                </attribute>
+                <attribute name="templateEngine" type="string" fixed="shibboleth.TemplateEngine">
+                    <annotation>
+                        <documentation>Name of the template engine defined within the application.</documentation>
+                    </annotation>
+                </attribute>
+            </extension>
+        </complexContent>
+    </complexType>
+    <element name="Key" type="uid:KeyType">
+        <annotation>
+            <documentation>A description of a column in the result set from the query.</documentation>
+        </annotation>
+    </element>
+    <complexType name="KeyType">
+        <attribute name="keyName" type="string" use="required">
+            <annotation>
+                <documentation>The name of the database key.</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="attributeID" type="string">
+            <annotation>
+                <documentation>The name of the attribute that data from this column should be added to.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+    <element name="MongoHost" type="uid:MongoHostType">
+        <annotation>
+            <documentation>A description of a mongodb host connection.</documentation>
+        </annotation>
+    </element>
+    <complexType name="MongoHostType">
+        <attribute name="hostName" type="string" use="required">
+            <annotation>
+                <documentation>The host of the mongo database server.</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="port" type="int">
+            <annotation>
+                <documentation>The tcp port of the mongo database server.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+</schema>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project>
+  <modelVersion>4.0.0</modelVersion>
+  <groupId>edu.internet2.middleware</groupId>
+  <artifactId>mongodb-connector</artifactId>
+  <version>0.2-SNAPSHOT</version>
+  <packaging>jar</packaging>
+  <name>MongoDB data connector</name>
+  <description>MongoDB data connector for Shibboleth IdP</description>
+  <inceptionYear>2011</inceptionYear>
+  
+  <developers>
+    <developer>
+      <id>stefan</id>
+      <name>Stefan Wold</name>
+      <email>stefan.wold@unitedid.org</email>
+      <organization>United ID</organization>
+      <organizationUrl>http://www.unitedid.org/</organizationUrl>
+      <roles>
+      </roles>
+    </developer>
+  </developers>
+
+  <organization>
+    <name>United ID</name>
+    <url>http://www.unitedid.org/</url>
+  </organization>
+
+  <repositories>
+    <repository>
+      <id>shibboleth.internet2.edu</id>
+      <name>Internet2</name>
+      <layout>default</layout>
+      <url>http://shibboleth.internet2.edu/downloads/maven2</url>
+      <releases>
+        <updatePolicy>always</updatePolicy>
+      </releases>
+      <snapshots>
+        <enabled>false</enabled>
+      </snapshots>
+    </repository>
+  </repositories>
+
+  <dependencies>
+    <!-- Compile dependencies -->
+    <dependency>
+      <groupId>org.mongodb</groupId>
+      <artifactId>mongo-java-driver</artifactId>
+      <version>2.5</version>
+      <scope>compile</scope>
+    </dependency>
+
+    <!-- Provided dependencies -->
+    <dependency>
+      <groupId>edu.internet2.middleware</groupId>
+      <artifactId>shibboleth-identityprovider</artifactId>
+      <version>2.2.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>javax.servlet</groupId>
+      <artifactId>servlet-api</artifactId>
+      <version>2.5</version>
+      <scope>provided</scope>
+    </dependency>
+    
+    <!-- Runtime dependencies -->
+
+    <!-- Test dependencies -->
+    
+  </dependencies>
+  
+  <build>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-compiler-plugin</artifactId>
+        <version>2.3.2</version>
+        <configuration>
+          <source>1.5</source>
+          <target>1.5</target>
+          <!-- <debug>true</debug> -->
+        </configuration>
+      </plugin>
+        <plugin>
+            <groupId>org.apache.maven.plugins</groupId>
+            <artifactId>maven-assembly-plugin</artifactId>
+            <configuration>
+                <descriptors>
+                    <descriptor>src/main/assembly/bin.xml</descriptor>
+                    <descriptor>src/main/assembly/src.xml</descriptor>
+                </descriptors>
+            </configuration>
+            <executions>
+                <execution>
+                    <id>make-assembly</id>
+                    <phase>package</phase>
+                    <goals>
+                        <goal>attached</goal>
+                    </goals>
+                </execution>
+            </executions>
+        </plugin>
+    </plugins>
+  </build>
+</project>
