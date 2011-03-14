@@ -16,15 +16,17 @@
       <name>Stefan Wold</name>
       <email>stefan.wold@unitedid.org</email>
       <organization>United ID</organization>
-      <organizationUrl>http://www.unitedid.org/</organizationUrl>
+      <organizationUrl>http://unitedid.org/</organizationUrl>
       <roles>
+        <role>developer</role>
+        <role>documentation</role>
       </roles>
     </developer>
   </developers>
 
   <organization>
     <name>United ID</name>
-    <url>http://www.unitedid.org/</url>
+    <url>http://unitedid.org/</url>
   </organization>
 
   <repositories>
@@ -83,25 +85,43 @@
           <!-- <debug>true</debug> -->
         </configuration>
       </plugin>
-        <plugin>
-            <groupId>org.apache.maven.plugins</groupId>
-            <artifactId>maven-assembly-plugin</artifactId>
-            <configuration>
-                <descriptors>
-                    <descriptor>src/main/assembly/bin.xml</descriptor>
-                    <descriptor>src/main/assembly/src.xml</descriptor>
-                </descriptors>
-            </configuration>
-            <executions>
-                <execution>
-                    <id>make-assembly</id>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>attached</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-assembly-plugin</artifactId>
+        <configuration>
+          <descriptors>
+            <descriptor>src/main/assembly/bin.xml</descriptor>
+            <descriptor>src/main/assembly/src.xml</descriptor>
+          </descriptors>
+        </configuration>
+        <executions>
+          <execution>
+            <id>make-assembly</id>
+            <phase>package</phase>
+            <goals>
+              <goal>attached</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
     </plugins>
   </build>
+<reporting>
+    <plugins>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-javadoc-plugin</artifactId>
+        <configuration>
+          <links>
+            <link>http://java.sun.com/j2se/1.5.0/docs/api/</link>
+          </links>
+          <quiet>true</quiet>
+          <version>true</version>
+          <doctitle>${project.name} ${project.version} Java API.</doctitle>
+          <windowtitle>${project.name} ${project.version} Java API.</windowtitle>
+          <overview>src/main/java/overview.html</overview>
+        </configuration>
+      </plugin>
+    </plugins>
+  </reporting>
 </project>
