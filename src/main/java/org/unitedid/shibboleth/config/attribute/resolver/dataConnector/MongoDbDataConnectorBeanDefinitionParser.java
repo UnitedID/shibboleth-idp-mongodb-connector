@@ -86,8 +86,8 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         log.debug("Data connector {} hosts {}", pluginId, hosts.toString());
         pluginBuilder.addPropertyValue("mongoHost", hosts);
 
-        List<MongoDbKeyAttributeMapper> attributeMappers = parseKeyDescriptors(pluginId, pluginConfigChildren, pluginBuilder);
-        pluginBuilder.addPropertyValue("keyAttributeMap", attributeMappers);
+        List<MongoDbKeyAttributeMapper> keyAttributeMaps = parseAttributeMappings(pluginId, pluginConfigChildren, pluginBuilder);
+        pluginBuilder.addPropertyValue("keyAttributeMap", keyAttributeMaps);
 
         String queryTemplate = pluginConfigChildren.get(QUERY_TEMPLATE_ELEMENT_NAME).get(0).getTextContent();
         queryTemplate = DatatypeHelper.safeTrimOrNullString(queryTemplate);
@@ -106,24 +106,24 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
      * @param pluginBuilder the bean definition parser
      * @return the mongodb key attribute mappings
      */
-    protected List<MongoDbKeyAttributeMapper> parseKeyDescriptors(String pluginId,
-                                                             Map<QName, List<Element>> pluginConfigChildren,
-                                                             BeanDefinitionBuilder pluginBuilder) {
+    protected List<MongoDbKeyAttributeMapper> parseAttributeMappings(String pluginId,
+                                                                     Map<QName, List<Element>> pluginConfigChildren,
+                                                                     BeanDefinitionBuilder pluginBuilder) {
 
-        List<MongoDbKeyAttributeMapper> keyAttributeMappers = new ArrayList<MongoDbKeyAttributeMapper>();
-        MongoDbKeyAttributeMapper keyAttributeMapper;
+        List<MongoDbKeyAttributeMapper> keyAttributeMaps = new ArrayList<MongoDbKeyAttributeMapper>();
+        MongoDbKeyAttributeMapper keyAttributeMap;
         String keyName;
         String attributeName;
         if (pluginConfigChildren.containsKey(KEY_ELEMENT_NAME)) {
             for (Element e : pluginConfigChildren.get(KEY_ELEMENT_NAME)) {
                 keyName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "keyName"));
                 attributeName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "attributeID"));
-                keyAttributeMapper = new MongoDbKeyAttributeMapper(keyName, attributeName);
-                keyAttributeMappers.add(keyAttributeMapper);
+                keyAttributeMap = new MongoDbKeyAttributeMapper(keyName, attributeName);
+                keyAttributeMaps.add(keyAttributeMap);
             }
-            log.debug("Data connector {} key descriptors: {}", pluginId, keyAttributeMappers);
+            log.debug("Data connector {} key descriptors: {}", pluginId, keyAttributeMaps);
         }
-        return keyAttributeMappers;
+        return keyAttributeMaps;
     }
 
     /**
