@@ -243,7 +243,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     }
 
     /**
-     * Process the result from the query and retunr a list of resolved attributes
+     * Process the result from the query and return a list of resolved attributes
      *
      * @param result the result from the query
      * @return a list of resolved attributes

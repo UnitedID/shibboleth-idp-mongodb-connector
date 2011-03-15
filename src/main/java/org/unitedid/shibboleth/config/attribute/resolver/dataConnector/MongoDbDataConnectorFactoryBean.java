@@ -122,51 +122,111 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
         keyAttributeMap = list;
     }
 
+    /**
+     * Gets a list of mongo server addresses
+     *
+     * @return list of mongo server addresses
+     */
     public List<ServerAddress> getMongoHost() {
         return mongoHost;
     }
 
+    /**
+     * Sets a list of mongo server addresses
+     *
+     * @param host list of mongo server addresses
+     */
     public void setMongoHost(List<ServerAddress> host) {
         mongoHost = host;
     }
 
+    /**
+     * Gets the mongo database name
+     *
+     * @return mongo database name
+     */
     public String getMongoDbName() {
         return mongoDbName;
     }
 
+    /**
+     * Sets the mongo database name
+     *
+     * @param dbName the mongo database name
+     */
     public void setMongoDbName(String dbName) {
         mongoDbName = dbName;
     }
 
+    /**
+     * Gets the mongo database username
+     *
+     * @return mongo database username
+     */
     public String getMongoUser() {
         return mongoUser;
     }
 
+    /**
+     * Sets the mongo database username
+     *
+     * @param user the mongo database username
+     */
     public void setMongoUser(String user) {
         mongoUser = user;
     }
 
+    /**
+     * Gets the mongo database password
+     *
+     * @return mongo database password
+     */
     public String getMongoPassword() {
         return mongoPassword;
     }
 
+    /**
+     * Sets the mongo database password
+     *
+     * @param password the mongo database password
+     */
     public void setMongoPassword(String password) {
         mongoPassword = password;
     }
 
+    /**
+     * Gets the mongo database collection name
+     *
+     * @return mongo database collection name
+     */
     public String getMongoCollection() {
         return mongoCollection;
     }
 
+    /**
+     * Sets the mongo database collection name
+     *
+     * @param collection the mongo database collection name
+     */
     public void setMongoCollection(String collection) {
         mongoCollection = collection;
     }
 
+    /**
+     * Gets the template used to create a query
+     *
+     * @return template used to createa a query
+     */
     public String getQueryTemplate() {
         return queryTemplate;
     }
 
-    public void setQueryTemplate(String query) {
-        queryTemplate = query;
+    /**
+     * Sets the template used to create a query
+     *
+     * @param template used to create a query
+     */
+    public void setQueryTemplate(String template) {
+        queryTemplate = template;
     }
 }
