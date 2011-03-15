@@ -1,0 +1,85 @@
+MongoDB data connector for use with the Shibboleth 2.x IdP.
+
+
+INSTALLATION
+------------
+1. Add the project jar and all its dependencies to the Shibboleth IdP source
+   lib directory.
+2. Re-install the IdP using the install script to build and deploy a new idp.war
+
+
+CONFIGURATION
+-------------
+Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
+
+1. Add namespace and the xsd schema to the root element:
+
+   xmlns:uid="http://dev.unitedid.org/NS/mongodb-connector"
+
+   http://dev.unitedid.org/NS/mongodb-connector classpath:/schema/mongodb-connector.xsd   
+
+
+2. Add the mongodb connector definition
+
+   EXAMPLE 1 (one mongodb server):
+---------------------------------------------------------------------------------------
+
+    <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="users">
+      <uid:MongoHost hostName="server1.example.com" port="27017" />
+
+      <uid:QueryTemplate>
+        <![CDATA[
+            { 'userName' : '$requestContext.principalName' }
+        ]]>
+      </uid:QueryTemplate>
+    </resolver:DataConnector>
+
+---------------------------------------------------------------------------------------
+
+    EXAMPLE 2 (multiple mongodb servers):
+
+---------------------------------------------------------------------------------------
+
+    <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="users">
+      <uid:MongoHost hostName="server1.example.com" port="27017" />
+      <uid:MongoHost hostName="server2.example.com" port="27017" />
+      <uid:MongoHost hostName="server3.example.com" port="27017" />
+
+      <uid:QueryTemplate>
+        <![CDATA[
+            { 'userName' : '$requestContext.principalName' }
+        ]]>
+      </uid:QueryTemplate>
+    </resolver:DataConnector>
+
+---------------------------------------------------------------------------------------
+
+    EXAMPLE 3 (map document keys to an attributeId):
+
+---------------------------------------------------------------------------------------
+
+    <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="users">
+      <uid:MongoHost hostName="server1.example.com" port="27017" />
+
+      <uid:QueryTemplate>
+        <![CDATA[
+            { 'userName' : '$requestContext.principalName' }
+        ]]>
+      </uid:QueryTemplate>
+
+      <uid:Key keyName="userName" attributeID="uid" />
+      <uid:Key keyName="email" attributeID="mail" />
+    </resolver:DataConnector>
+
+---------------------------------------------------------------------------------------
+
+NOTE:
+
+a. QueryTemplate is in JSON format
+
