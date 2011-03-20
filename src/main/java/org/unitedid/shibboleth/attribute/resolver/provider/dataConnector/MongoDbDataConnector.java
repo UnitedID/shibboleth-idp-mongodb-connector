@@ -26,6 +26,7 @@ import edu.internet2.middleware.shibboleth.common.attribute.resolver.AttributeRe
 import edu.internet2.middleware.shibboleth.common.attribute.resolver.provider.ShibbolethResolutionContext;
 import edu.internet2.middleware.shibboleth.common.attribute.resolver.provider.dataConnector.BaseDataConnector;
 import edu.internet2.middleware.shibboleth.common.attribute.resolver.provider.dataConnector.TemplateEngine;
+import edu.internet2.middleware.shibboleth.common.session.LogoutEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
@@ -355,7 +356,12 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
 
     /** {@inheritDoc} */
     public void onApplicationEvent(ApplicationEvent applicationEvent) {
-        //To change body of implemented methods use File | Settings | File Templates.
+        if (applicationEvent instanceof LogoutEvent) {
+            LogoutEvent logoutEvent = (LogoutEvent) applicationEvent;
+            if (cacheResults) {
+                dataCache.remove(logoutEvent.getUserSession().getPrincipalName());
+            }
+        }
     }
 
     /**
