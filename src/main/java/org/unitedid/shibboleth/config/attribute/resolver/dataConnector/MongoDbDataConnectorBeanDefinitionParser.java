@@ -21,6 +21,7 @@ package org.unitedid.shibboleth.config.attribute.resolver.dataConnector;
 import com.mongodb.ServerAddress;
 import edu.internet2.middleware.shibboleth.common.config.attribute.resolver.dataConnector.BaseDataConnectorBeanDefinitionParser;
 import org.opensaml.xml.util.DatatypeHelper;
+import org.opensaml.xml.util.XMLHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
@@ -81,6 +82,13 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
             String mongoPassword = pluginConfig.getAttributeNS(null, "mongoPassword");
             pluginBuilder.addPropertyValue("mongoPassword", mongoPassword);
         }
+
+        boolean cacheResults = false;
+        if (pluginConfig.hasAttributeNS(null, "cacheResults")) {
+            cacheResults = XMLHelper.getAttributeValueAsBoolean(pluginConfig.getAttributeNodeNS(null, "cacheResults"));
+        }
+        log.info("Data connector {} cache results: {}", pluginId, cacheResults);
+        pluginBuilder.addPropertyValue("cacheResults", cacheResults);
 
         List<ServerAddress> hosts = parseMongoHostNames(pluginId, pluginConfigChildren, pluginBuilder);
         log.debug("Data connector {} hosts {}", pluginId, hosts.toString());
@@ -152,7 +160,7 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
                         hosts.add(new ServerAddress(host));
                     }
                 } catch (UnknownHostException err) {
-                    log.debug("Data connector {} unknown host {}", pluginId, err);
+                    log.error("Data connector {} unknown host {}", pluginId, err);
                 }
             }
         }

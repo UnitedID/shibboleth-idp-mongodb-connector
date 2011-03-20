@@ -59,6 +59,12 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     /** Password */
     private String mongoPassword;
 
+    /** Whether the query results should be cached */
+    private boolean cacheResults;
+
+    /** Data cache */
+    private Map<String, Map<String, Map<String, BaseAttribute>>> dataCache;
+
     /** Mongo connection object. */
     private Mongo mongoCon;
 
@@ -102,6 +108,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
         initialized = true;
         registerTemplate();
         initializeMongoDbConnection();
+        initializeCache();
     }
 
     /**
@@ -121,6 +128,61 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     public void setTemplateEngine(TemplateEngine engine) {
         queryCreator = engine;
         registerTemplate();
+        resetCache();
+    }
+
+    /**
+     * Gets the mongo database username
+     *
+     * @return mongo database username
+     */
+    public String getMongoUser() {
+        return mongoUser;
+    }
+
+    /**
+     * Sets the mongo database username
+     *
+     * @param user the mongo database username
+     */
+    public void setMongoUser(String user) {
+        mongoUser = user;
+    }
+
+    /**
+     * Gets the mongo database password
+     *
+     * @return mongo database password
+     */
+    public String getMongoPassword() {
+        return mongoPassword;
+    }
+
+    /**
+     * Sets the mongo database password
+     *
+     * @param password the mongo database password
+     */
+    public void setMongoPassword(String password) {
+        mongoPassword = password;
+    }
+
+    /**
+     * Gets whether to cache search results
+     *
+     * @return cacheResults whether to cache query result
+     */
+    public boolean isCacheResults() {
+        return cacheResults;
+    }
+
+    /**
+     * Sets whether to cache search results
+     *
+     * @param cache whether to cache search results
+     */
+    public void setCacheResults(boolean cache) {
+        cacheResults = cache;
     }
 
     /**
@@ -139,6 +201,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      */
     public void setQueryTemplate(String template) {
         queryTemplate = template;
+        resetCache();
     }
 
     /**
@@ -166,11 +229,38 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
         if (initialized) {
             log.debug("MongoDB connector initializing!");
             mongoCon = new Mongo(mongoHost);
+
+            // Ok to read from slave if more than one server is configured
             if (mongoHost.size() > 1) {
-                log.debug("MongoDB data connector {} slave OK", getId());
                 mongoCon.slaveOk();
             }
             db = mongoCon.getDB(mongoDbName);
+            if (mongoUser != null) {
+                boolean dbAuth = db.authenticate(mongoUser, mongoPassword.toCharArray());
+                if (!dbAuth) {
+                    log.error("MongoDB data connector {} authentication failed for database {}, username or password!", getId(), mongoDbName);
+                } else {
+                    log.debug("MongoDB data connector {} authentication successfull!", getId());
+                }
+            }
+        }
+    }
+
+    /**
+     * Initialize search results cache
+     */
+    protected void initializeCache() {
+        if (cacheResults && initialized) {
+            dataCache = new HashMap<String, Map<String, Map<String, BaseAttribute>>>();
+        }
+    }
+
+    /**
+     * Reset search results cache
+     */
+    protected void resetCache() {
+        if (cacheResults && initialized) {
+            dataCache.clear();
         }
     }
 
@@ -190,9 +280,58 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
         log.debug("Search Query: {}", query);
 
         Map<String, BaseAttribute> resolvedAttributes = new HashMap<String, BaseAttribute>();
-        resolvedAttributes = retrieveAttributesFromDatabase(query);
+
+        if (cacheResults) {
+            log.debug("Data connector {} checking cache for attributes.", getId());
+            resolvedAttributes = getAttributeCache(resolutionContext, query);
+        }
+
+        if (resolvedAttributes == null) {
+            resolvedAttributes = retrieveAttributesFromDatabase(query);
+            if (cacheResults && resolvedAttributes != null) {
+                setAttributeCache(resolutionContext, query, resolvedAttributes);
+            }
+        }
 
         return resolvedAttributes;
+    }
+
+    /**
+     * Retrieves cached attributes for current resolution context
+     *
+     * @param resolutionContext <code>ResolutionContext</code>
+     * @param query the query used to get the search result
+     * @return cached attributes
+     */
+    protected Map<String,BaseAttribute> getAttributeCache(ShibbolethResolutionContext resolutionContext, String query) {
+        if (cacheResults) {
+            String principal = resolutionContext.getAttributeRequestContext().getPrincipalName();
+            Map<String, Map<String, BaseAttribute>> cache = dataCache.get(principal);
+            if (cache != null) {
+                Map<String, BaseAttribute> attributes = cache.get(query);
+                log.debug("Data connector {} got cached attributes for principal: {}", getId(), principal);
+                return attributes;
+            }
+        }
+
+        return null;
+    }
+
+    /**
+     * Stores the attributes in the cache
+     *
+     * @param resolutionContext <code>ResolutionContext</code>
+     * @param query the query used to get the search result
+     * @param resolvedAttributes <code>Map</code> of attribute ids to attribute
+     */
+    protected void setAttributeCache(ShibbolethResolutionContext resolutionContext, String query, Map<String,BaseAttribute> resolvedAttributes) {
+        String principal = resolutionContext.getAttributeRequestContext().getPrincipalName();
+        Map<String, Map<String, BaseAttribute>> cache = dataCache.get(principal);
+        if (cache == null) {
+            cache = new HashMap<String, Map<String, BaseAttribute>>();
+            dataCache.put(principal, cache);
+        }
+        cache.put(query, resolvedAttributes);
     }
 
     /** {@inheritDoc} */
@@ -229,14 +368,14 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     protected Map<String, BaseAttribute> retrieveAttributesFromDatabase(String q) throws AttributeResolutionException {
         Map <String, BaseAttribute> resolvedAttributes = new HashMap<String, BaseAttribute>();
         try {
-            log.debug("Data connector {} using host {}", getId(), db.getMongo().getConnectPoint());
+            log.debug("Data connector {} retrieving attributes from: {}", getId(), db.getMongo().getAddress());
             DBCollection collection = db.getCollection(mongoCollection);
             DBObject query = (DBObject) JSON.parse(q);
             resolvedAttributes = processCollectionResult(collection.findOne(query));
 
         } catch (MongoException e) {
             log.error("Data connector {} exception", getId(), e);
-            throw new AttributeResolutionException("Mongo error " + getId(), e);
+            throw new AttributeResolutionException("MongoDB data connector " + getId() + " unable to execute query", e);
         }
 
         return resolvedAttributes;

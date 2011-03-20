@@ -64,6 +64,14 @@
                         </documentation>
                     </annotation>
                 </attribute>
+                <attribute name="cacheResults" type="boolean">
+                    <annotation>
+                        <documentation>
+                            Boolean flag to enable or disable whether search results should be cached for the duration
+                            of the user's session (Default is false).
+                        </documentation>
+                    </annotation>
+                </attribute>
                 <attribute name="templateEngine" type="string" fixed="shibboleth.TemplateEngine">
                     <annotation>
                         <documentation>Name of the template engine defined within the application.</documentation>

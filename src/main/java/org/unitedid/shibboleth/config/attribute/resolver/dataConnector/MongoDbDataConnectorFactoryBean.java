@@ -58,6 +58,9 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
     /** Password */
     private String mongoPassword;
 
+    /** Whether the query results should be cached */
+    private boolean cacheResults;
+
     /** Template that create the query to use */
     private String queryTemplate;
 
@@ -68,6 +71,12 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
         populateDataConnector(connector);
         connector.setQueryTemplate(getQueryTemplate());
         connector.setTemplateEngine(getTemplateEngine());
+        connector.setCacheResults(isCacheResults());
+
+        if (mongoUser != null) {
+            connector.setMongoUser(getMongoUser());
+            connector.setMongoPassword(getMongoPassword());
+        }
 
         if (getKeyAttributeMap() != null) {
             Map<String, MongoDbKeyAttributeMapper> keyAttributeMap = connector.getKeyAttributeMap();
@@ -210,6 +219,24 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
      */
     public void setMongoCollection(String collection) {
         mongoCollection = collection;
+    }
+
+    /**
+     * Gets whether to cache search results
+     *
+     * @return cacheResults whether to cache query result
+     */
+    public boolean isCacheResults() {
+        return cacheResults;
+    }
+
+    /**
+     * Sets whether to cache search results
+     *
+     * @param cache whether to cache search results
+     */
+    public void setCacheResults(boolean cache) {
+        cacheResults = cache;
     }
 
     /**
