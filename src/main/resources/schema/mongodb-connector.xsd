@@ -34,7 +34,7 @@
                             </documentation>
                         </annotation>
                     </element>
-                    <element ref="uid:Key" minOccurs="0" maxOccurs="unbounded" />
+                    <element ref="uid:AttributeMap" minOccurs="0" maxOccurs="unbounded" />
                 </sequence>
                 <attribute name="mongoDbName" type="string" use="required">
                     <annotation>
@@ -80,13 +80,13 @@
             </extension>
         </complexContent>
     </complexType>
-    <element name="Key" type="uid:KeyType">
+    <element name="AttributeMap" type="uid:AttributeMapType">
         <annotation>
             <documentation>A description of a column in the result set from the query.</documentation>
         </annotation>
     </element>
-    <complexType name="KeyType">
-        <attribute name="keyName" type="string" use="required">
+    <complexType name="AttributeMapType">
+        <attribute name="mongoKey" type="string" use="required">
             <annotation>
                 <documentation>The name of the database key.</documentation>
             </annotation>
@@ -103,7 +103,7 @@
         </annotation>
     </element>
     <complexType name="MongoHostType">
-        <attribute name="hostName" type="string" use="required">
+        <attribute name="host" type="string" use="required">
             <annotation>
                 <documentation>The host of the mongo database server.</documentation>
             </annotation>

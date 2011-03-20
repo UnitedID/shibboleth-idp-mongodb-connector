@@ -81,7 +81,7 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
         if (getKeyAttributeMap() != null) {
             Map<String, MongoDbKeyAttributeMapper> keyAttributeMap = connector.getKeyAttributeMap();
             for (MongoDbKeyAttributeMapper attributeMapper : getKeyAttributeMap()) {
-                keyAttributeMap.put(attributeMapper.getKeyName(), attributeMapper);
+                keyAttributeMap.put(attributeMapper.getMongoKey(), attributeMapper);
             }
         }
         connector.initialize();

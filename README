@@ -27,7 +27,7 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
                             mongoDbName="idp"
                             mongoCollection="users">
-      <uid:MongoHost hostName="server1.example.com" port="27017" />
+      <uid:MongoHost host="server1.example.com" port="27017" />
 
       <uid:QueryTemplate>
         <![CDATA[
@@ -45,9 +45,9 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
                             mongoDbName="idp"
                             mongoCollection="users">
-      <uid:MongoHost hostName="server1.example.com" port="27017" />
-      <uid:MongoHost hostName="server2.example.com" port="27017" />
-      <uid:MongoHost hostName="server3.example.com" port="27017" />
+      <uid:MongoHost host="server1.example.com" port="27017" />
+      <uid:MongoHost host="server2.example.com" port="27017" />
+      <uid:MongoHost host="server3.example.com" port="27017" />
 
       <uid:QueryTemplate>
         <![CDATA[
@@ -65,7 +65,7 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
                             mongoDbName="idp"
                             mongoCollection="users">
-      <uid:MongoHost hostName="server1.example.com" port="27017" />
+      <uid:MongoHost host="server1.example.com" port="27017" />
 
       <uid:QueryTemplate>
         <![CDATA[
@@ -73,8 +73,8 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
         ]]>
       </uid:QueryTemplate>
 
-      <uid:Key keyName="userName" attributeID="uid" />
-      <uid:Key keyName="email" attributeID="mail" />
+      <uid:AttributeMap mongoKey="userName" attributeID="uid" />
+      <uid:AttributeMap mongoKey="email" attributeID="mail" />
     </resolver:DataConnector>
 
 ---------------------------------------------------------------------------------------

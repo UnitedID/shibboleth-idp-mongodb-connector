@@ -45,7 +45,7 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
     public static final QName QUERY_TEMPLATE_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "QueryTemplate");
 
     /** Name of Key tag. */
-    public static final QName KEY_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "Key");
+    public static final QName KEY_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "AttributeMap");
 
     /** Name of MongoHost tag. */
     public static final QName HOST_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "MongoHost");
@@ -124,12 +124,12 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         String attributeName;
         if (pluginConfigChildren.containsKey(KEY_ELEMENT_NAME)) {
             for (Element e : pluginConfigChildren.get(KEY_ELEMENT_NAME)) {
-                keyName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "keyName"));
+                keyName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "mongoKey"));
                 attributeName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "attributeID"));
                 keyAttributeMap = new MongoDbKeyAttributeMapper(keyName, attributeName);
                 keyAttributeMaps.add(keyAttributeMap);
             }
-            log.debug("Data connector {} key descriptors: {}", pluginId, keyAttributeMaps);
+            log.debug("Data connector {} key attribute maps: {}", pluginId, keyAttributeMaps);
         }
         return keyAttributeMaps;
     }
@@ -151,7 +151,7 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
 
         if (pluginConfigChildren.containsKey(HOST_ELEMENT_NAME)) {
             for (Element e : pluginConfigChildren.get(HOST_ELEMENT_NAME)) {
-                host = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "hostName"));
+                host = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "host"));
                 try {
                     if (e.hasAttributeNS(null, "port")) {
                         port = Integer.parseInt(e.getAttributeNS(null, "port"));

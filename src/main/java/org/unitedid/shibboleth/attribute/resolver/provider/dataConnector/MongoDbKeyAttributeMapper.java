@@ -24,7 +24,7 @@ package org.unitedid.shibboleth.attribute.resolver.provider.dataConnector;
 public class MongoDbKeyAttributeMapper {
 
     /** The mongo document key */
-    private String keyName;
+    private String mongoKey;
 
     /** The shibboleth attribute */
     private String attributeName;
@@ -36,7 +36,7 @@ public class MongoDbKeyAttributeMapper {
      * @param attribute the shibboleth attribute
      */
     public MongoDbKeyAttributeMapper(String key, String attribute) {
-        keyName = key;
+        mongoKey = key;
         attributeName = attribute;
     }
 
@@ -45,8 +45,8 @@ public class MongoDbKeyAttributeMapper {
      *
      * @return the key name
      */
-    public String getKeyName() {
-        return keyName;
+    public String getMongoKey() {
+        return mongoKey;
     }
 
     /**
@@ -60,7 +60,7 @@ public class MongoDbKeyAttributeMapper {
 
     /** {@inheritDoc} */
     public String toString() {
-        return "MongoDbKeyAttributeMapper{keyName=" + keyName + ", attributeId=" + attributeName + "}";
+        return "MongoDbKeyAttributeMapper{mongoKey=" + mongoKey + ", attributeId=" + attributeName + "}";
     }
 
 }
