@@ -75,9 +75,6 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     /** DB ojbect. */
     private DB db;
 
-    /** Mongo collection object. */
-    private DBCollection collection;
-
     /** Template name that produces the query to use. */
     private String queryTemplateName;
 
@@ -230,12 +227,8 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
         if (initialized) {
             log.debug("MongoDB connector initializing!");
             mongoCon = new Mongo(mongoHost);
-
-            // Ok to read from slave if more than one server is configured
-            if (mongoHost.size() > 1) {
-                mongoCon.slaveOk();
-            }
             db = mongoCon.getDB(mongoDbName);
+
             if (mongoUser != null) {
                 boolean dbAuth = db.authenticate(mongoUser, mongoPassword.toCharArray());
                 if (!dbAuth) {
@@ -244,6 +237,11 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
                     log.debug("MongoDB data connector {} authentication successfull!", getId());
                 }
             }
+            // Ok to read from slave if at least three servers are configured (replica set)
+            if (mongoHost.size() > 2) {
+                mongoCon.slaveOk();
+            }
+
         }
     }
 
