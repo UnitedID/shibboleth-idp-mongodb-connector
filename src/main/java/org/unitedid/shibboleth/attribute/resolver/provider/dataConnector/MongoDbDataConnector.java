@@ -438,7 +438,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      * @param resolutionContext current resolution context
      * @param localId principal the persistent ID represents
      * @param salt salt used when generating a persistent ID via SHA-1 hash
-     * @return
+     * @return persistent ID entry
      * @throws MongoException
      */
     protected PersistentIdEntry createPersistentId(ShibbolethResolutionContext resolutionContext, String localId, byte[] salt) throws MongoException {
