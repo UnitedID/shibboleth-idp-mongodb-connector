@@ -50,6 +50,9 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
     /** Name of MongoHost tag. */
     public static final QName HOST_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "MongoHost");
 
+    /** Name of PersistentId tag. */
+    public static final QName PID_ELEMENT_NAME = new QName(UIDDataConnectorNamespaceHandler.NAMESPACE, "PersistentId");
+
     /** Class logger. */
     private final Logger log = LoggerFactory.getLogger(MongoDbDataConnectorBeanDefinitionParser.class);
 
@@ -94,13 +97,26 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         log.debug("Data connector {} hosts {}", pluginId, hosts.toString());
         pluginBuilder.addPropertyValue("mongoHost", hosts);
 
+        boolean usePersistentId = false;
+        if (pluginConfigChildren.containsKey(PID_ELEMENT_NAME)) {
+            Element e = pluginConfigChildren.get(PID_ELEMENT_NAME).get(0);
+            pluginBuilder.addPropertyValue("pidGeneratedAttributeId", e.getAttributeNS(null, "generatedAttributeId"));
+            pluginBuilder.addPropertyValue("pidSourceAttributeId", e.getAttributeNS(null, "sourceAttributeId"));
+            pluginBuilder.addPropertyValue("pidSalt", e.getAttributeNS(null, "salt").getBytes());
+            usePersistentId = true;
+        }
+        log.info("Data connector {} running in persistentId mode: {}", pluginId, usePersistentId);
+        pluginBuilder.addPropertyValue("usePersistentId", usePersistentId);
+
         List<MongoDbKeyAttributeMapper> keyAttributeMaps = parseAttributeMappings(pluginId, pluginConfigChildren, pluginBuilder);
         pluginBuilder.addPropertyValue("keyAttributeMap", keyAttributeMaps);
 
-        String queryTemplate = pluginConfigChildren.get(QUERY_TEMPLATE_ELEMENT_NAME).get(0).getTextContent();
-        queryTemplate = DatatypeHelper.safeTrimOrNullString(queryTemplate);
-        log.debug("Data connector {} MONGODB Query template: {}", pluginId, queryTemplate);
-        pluginBuilder.addPropertyValue("queryTemplate", queryTemplate);
+        if (usePersistentId == false) {
+            String queryTemplate = pluginConfigChildren.get(QUERY_TEMPLATE_ELEMENT_NAME).get(0).getTextContent();
+            queryTemplate = DatatypeHelper.safeTrimOrNullString(queryTemplate);
+            log.debug("Data connector {} query template: {}", pluginId, queryTemplate);
+            pluginBuilder.addPropertyValue("queryTemplate", queryTemplate);
+        }
 
         String templateEngineRef = pluginConfig.getAttributeNS(null, "templateEngine");
         pluginBuilder.addPropertyReference("templateEngine", templateEngineRef);
@@ -117,7 +133,6 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
     protected List<MongoDbKeyAttributeMapper> parseAttributeMappings(String pluginId,
                                                                      Map<QName, List<Element>> pluginConfigChildren,
                                                                      BeanDefinitionBuilder pluginBuilder) {
-
         List<MongoDbKeyAttributeMapper> keyAttributeMaps = new ArrayList<MongoDbKeyAttributeMapper>();
         MongoDbKeyAttributeMapper keyAttributeMap;
         String keyName;

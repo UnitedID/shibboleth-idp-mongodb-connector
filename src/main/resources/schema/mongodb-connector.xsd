@@ -27,7 +27,8 @@
             <extension base="resolver:BaseDataConnectorType">
                 <sequence>
                     <element ref="uid:MongoHost" minOccurs="1" maxOccurs="unbounded" />
-                    <element name="QueryTemplate" type="string">
+                    <element ref="uid:PersistentId" minOccurs="0" maxOccurs="1" />
+                    <element name="QueryTemplate" type="string" minOccurs="0">
                         <annotation>
                             <documentation>
                                 A template used to construct a query to the mongo database.
@@ -111,6 +112,34 @@
         <attribute name="port" type="int">
             <annotation>
                 <documentation>The tcp port of the mongo database server.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+    <element name="PersistentId" type="uid:PersistentIdType">
+        <annotation>
+            <documentation>Option to enable generating of a PersistentId</documentation>
+        </annotation>
+    </element>
+    <complexType name="PersistentIdType">
+        <attribute name="generatedAttributeId" type="string">
+            <annotation>
+                <documentation>
+                    The name of the attribute which should be used to as input to the ...
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="sourceAttributeId" type="string" use="required">
+            <annotation>
+                <documentation>
+                    The name of the attribute which should be used to as input to the ...
+                </documentation>
+            </annotation>
+        </attribute>
+        <attribute name="salt" type="string" use="required">
+            <annotation>
+                <documentation>
+                    A salt, of at least 16 bytes, used in the persistant Id
+                </documentation>
             </annotation>
         </attribute>
     </complexType>

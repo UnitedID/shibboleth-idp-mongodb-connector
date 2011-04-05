@@ -1,0 +1,19 @@
+=========================================================================
+==  NOTICE file corresponding to the section 4 d of                    ==
+==  the Apache License, Version 2.0,                                   ==
+==  in this case for the United ID shibboleth mongodb connector.       ==
+=========================================================================
+Shibboleth mongodb connector
+Copyright (c) 2011 United ID
+
+
+We wish to acknowledge the following copyrighted works that make up
+portions of this software:
+
+This software contains code derived from the University Corporation
+for Advanced Internet Development, Inc.
+Copyright [2007] [University Corporation for Advanced Internet Development, Inc.]
+
+
+This software includes third party software subject to the following copyrights:
+- mongo-java-driver - Copyright (C) 2008 10gen Inc.
