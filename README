@@ -15,7 +15,7 @@ INSTALLATION
 
 CONFIGURATION
 -------------
-Enable the mongodb connector in $IDP_CONFIGL_DIR/conf/attribute-resolver.xml
+Enable the mongodb connector in $IDP_CONFIG_DIR/conf/attribute-resolver.xml
 
 1. Add namespace and the xsd schema to the root element:
 
