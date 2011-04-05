@@ -1,4 +1,9 @@
-MongoDB data connector for use with the Shibboleth 2.x IdP.
+MongoDB data and persistent ID connector for use with the Shibboleth 2.x IdP.
+
+
+DOCUMENTATION
+-------------
+https://wiki.shibboleth.net/confluence/display/SHIB2/MongoDB+connector
 
 
 INSTALLATION
@@ -10,17 +15,17 @@ INSTALLATION
 
 CONFIGURATION
 -------------
-Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
+Enable the mongodb connector in $IDP_CONFIGL_DIR/conf/attribute-resolver.xml
 
 1. Add namespace and the xsd schema to the root element:
 
    xmlns:uid="http://dev.unitedid.org/NS/mongodb-connector"
 
-   http://dev.unitedid.org/NS/mongodb-connector classpath:/schema/mongodb-connector.xsd   
+   http://dev.unitedid.org/NS/mongodb-connector classpath:/schema/mongodb-connector.xsd
 
 
-2. Add the mongodb connector definition
-
+2. Adding the mongodb data connector
+---------------------------------------------------------------------------------------
    EXAMPLE 1 (one mongodb server):
 ---------------------------------------------------------------------------------------
 
@@ -37,9 +42,7 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
     </resolver:DataConnector>
 
 ---------------------------------------------------------------------------------------
-
     EXAMPLE 2 (multiple mongodb servers):
-
 ---------------------------------------------------------------------------------------
 
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
@@ -57,9 +60,7 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
     </resolver:DataConnector>
 
 ---------------------------------------------------------------------------------------
-
     EXAMPLE 3 (map document keys to an attributeId):
-
 ---------------------------------------------------------------------------------------
 
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
@@ -77,9 +78,56 @@ Enable the mongodb connector in $IDP_INSTALL_DIR/conf/attribute-resolver.xml
       <uid:AttributeMap mongoKey="email" attributeID="mail" />
     </resolver:DataConnector>
 
+
+3. (Optional) Adding mongodb persistent ID connector
+
+---------------------------------------------------------------------------------------
+    EXAMPLE 1 (Attribute definition, Mongodb data connector, Mongodb persistent ID connector):
 ---------------------------------------------------------------------------------------
 
-NOTE:
+    <!-- Attribute definition -->
+    <resolver:AttributeDefinition xsi:type="ad:SAML2NameID" id="eduPersonTargetedID"
+                                  nameIdFormat="urn:oasis:names:tc:SAML:2.0:nameid-format:persistent" sourceAttributeID="persistentID">
+        <resolver:Dependency ref="myMongo2" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML1XMLObject" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.10" />
+        <resolver:AttributeEncoder xsi:type="enc:SAML2XMLObject" name="urn:oid:1.3.6.1.4.1.5923.1.1.1.10" friendlyName="eduPersonTargetedID" />
+    </resolver:AttributeDefinition>
 
+    <!-- Mongodb data connector -->
+    <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="users">
+      <uid:MongoHost host="server1.example.com" port="27017" />
+      <uid:MongoHost host="server2.example.com" port="27017" />
+      <uid:MongoHost host="server3.example.com" port="27017" />
+
+      <uid:QueryTemplate>
+        <![CDATA[
+            { 'userName' : '$requestContext.principalName' }
+        ]]>
+      </uid:QueryTemplate>
+      <uid:AttributeMap mongoKey="userName" attributeID="uid" />
+    </resolver:DataConnector>
+
+    <!-- Mongodb persistent ID connector -->
+    <resolver:DataConnector id="myMongo2" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="shibpid">
+
+      <!-- Resolver dependency needed to resolve uid in sourceAttributeId -->
+      <resolver:Dependency ref="myMongo" />
+
+      <uid:MongoHost host="server1.example.com" port="27017" />
+      <uid:MongoHost host="server2.example.com" port="27017" />
+      <uid:MongoHost host="server3.example.com" port="27017" />
+
+      <uid:PersistentId generatedAttributeId="persistentID"
+                        sourceAttributeId="uid"
+                        salt="1q2w3e4r5t56y678dcfvgbhynujtywrtqrecadaqqwe243" />
+    </resolver:DataConnector>
+
+
+NOTE:
+----
 a. QueryTemplate is in JSON format
 
