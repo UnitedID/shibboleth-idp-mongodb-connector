@@ -60,7 +60,7 @@ Enable the mongodb connector in $IDP_CONFIG_DIR/conf/attribute-resolver.xml
     </resolver:DataConnector>
 
 ---------------------------------------------------------------------------------------
-    EXAMPLE 3 (map document keys to an attributeId):
+    EXAMPLE 3 (map document fields to an attributeId):
 ---------------------------------------------------------------------------------------
 
     <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
@@ -78,6 +78,40 @@ Enable the mongodb connector in $IDP_CONFIG_DIR/conf/attribute-resolver.xml
       <uid:AttributeMap mongoKey="email" attributeID="mail" />
     </resolver:DataConnector>
 
+---------------------------------------------------------------------------------------
+    EXAMPLE 4 (map embedded HashMap fields to an attributeId):
+---------------------------------------------------------------------------------------
+
+    <resolver:DataConnector id="myMongo" xsi:type="uid:MongoDbDataConnector"
+                            mongoDbName="idp"
+                            mongoCollection="users">
+      <uid:MongoHost host="server1.example.com" port="27017" />
+
+      <uid:QueryTemplate>
+        <![CDATA[
+            { 'userName' : '$requestContext.principalName' }
+        ]]>
+      </uid:QueryTemplate>
+
+      <uid:AttributeMap mongoKey="userName" attributeID="uid" />
+      <uid:AttributeMap mongoKey="email" attributeID="mail" />
+      <uid:AttributeMap mongoKey="address">
+        <uid:ValueMap mongoKey="zip" attributeID="postalCode" />
+        <uid:ValueMap mongoKey="address1" attributeID="postalAddress" />
+      </uid:AttributeMap>
+    </resolver:DataConnector>
+
+    <!-- JSON structure for the this example
+    { "_id" : ObjectId("4e5bd2d8a7e6b7a04a15ed28"),
+      "address" : { "address1" : "Example road 10",
+                    "address2" : "",
+                    "city" : "Somewhere",
+                    "country" : "swe",
+                    "zip" : "11111" },
+      "mail" : "johndoe@example.com",
+      "username" : "johndoe"
+    }
+    -->
 
 3. (Optional) Adding mongodb persistent ID connector
 

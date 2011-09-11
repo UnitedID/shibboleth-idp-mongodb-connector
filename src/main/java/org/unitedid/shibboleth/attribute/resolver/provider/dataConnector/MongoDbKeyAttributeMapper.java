@@ -18,6 +18,9 @@
 
 package org.unitedid.shibboleth.attribute.resolver.provider.dataConnector;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  * A mapping class between mongo document keys and shibboleth attributes
  */
@@ -28,6 +31,8 @@ public class MongoDbKeyAttributeMapper {
 
     /** The shibboleth attribute */
     private String attributeName;
+
+    private List<MongoDbKeyAttributeMapper> childKeyAttributeMaps = new ArrayList<MongoDbKeyAttributeMapper>();
 
     /**
      * Constructor
@@ -58,9 +63,17 @@ public class MongoDbKeyAttributeMapper {
         return attributeName;
     }
 
+    public List<MongoDbKeyAttributeMapper> getChildKeyAttributeMaps() {
+        return childKeyAttributeMaps;
+    }
+
+    public void setChildKeyAttributeMaps(List<MongoDbKeyAttributeMapper> childKeyAttributeMaps) {
+        this.childKeyAttributeMaps = childKeyAttributeMaps;
+    }
+
     /** {@inheritDoc} */
     public String toString() {
-        return "MongoDbKeyAttributeMapper{mongoKey=" + mongoKey + ", attributeId=" + attributeName + "}";
+        return "MongoDbKeyAttributeMapper{mongoKey=" + mongoKey + ", attributeId=" + attributeName + ", children=" + childKeyAttributeMaps.size() + "}";
     }
 
 }

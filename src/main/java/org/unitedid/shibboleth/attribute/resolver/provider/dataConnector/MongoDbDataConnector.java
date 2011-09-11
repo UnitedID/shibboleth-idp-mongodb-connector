@@ -70,9 +70,6 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     /** Data cache */
     private Map<String, Map<String, Map<String, BaseAttribute>>> dataCache;
 
-    /** Mongo connection object. */
-    private Mongo mongoCon;
-
     /** Mapping object between mongo document keys and shibboleth attributes */
     private Map<String, MongoDbKeyAttributeMapper> keyAttributeMap;
 
@@ -133,7 +130,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     protected void initializeMongoDbConnection() {
         if (initialized) {
             log.debug("MongoDB connector initializing!");
-            mongoCon = new Mongo(mongoHost);
+            Mongo mongoCon = new Mongo(mongoHost);
             db = mongoCon.getDB(mongoDbName);
 
             if (mongoUser != null) {
@@ -286,7 +283,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      *
      * @param q the query to run
      * @return a list of attributes
-     * @throws AttributeResolutionException
+     * @throws AttributeResolutionException if an error occurs during query execution
      */
     protected Map<String, BaseAttribute> retrieveAttributesFromDatabase(String q) throws AttributeResolutionException {
         Map <String, BaseAttribute> resolvedAttributes = new HashMap<String, BaseAttribute>();
@@ -309,7 +306,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      *
      * @param resolutionContext the current resolutionContext
      * @return persistent id attribute
-     * @throws AttributeResolutionException
+     * @throws AttributeResolutionException if an error occurs when generating or fetching a persistent ID
      */
     protected Map<String, BaseAttribute> retrievePersistentIdAttribute(ShibbolethResolutionContext resolutionContext) throws AttributeResolutionException {
         Map <String, BaseAttribute> resolvedAttributes = new HashMap<String, BaseAttribute>();
@@ -331,7 +328,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      *
      * @param result the result from the query
      * @return a list of resolved attributes
-     * @throws AttributeResolutionException
+     * @throws AttributeResolutionException if an error occurs when reading the mongo db result
      */
     protected Map<String, BaseAttribute> processCollectionResult(DBObject result) throws AttributeResolutionException {
         Map<String, BaseAttribute> attributes = new HashMap<String, BaseAttribute>();
@@ -341,26 +338,39 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
 
             if (result != null) {
                 for (String keyName : result.keySet()) {
-                    if (result.get(keyName) instanceof com.mongodb.BasicDBList) {
-                        log.debug("Processing of BasicDBList not implemented.");
-                        continue;
-                    }
                     log.debug("Processing mongodb key: {} class: {}", keyName, result.get(keyName).getClass());
 
+                    List<MongoDbKeyAttributeMapper> keyChildMap = null;
                     keyAttributeMapper = keyAttributeMap.get(keyName);
-                    if (keyAttributeMapper == null || keyAttributeMapper.getAttributeName() == null) {
-                        attribute = attributes.get(keyName);
-                        if (attribute == null) {
-                            attribute = new BasicAttribute(keyName);
-                        }
-                    } else {
-                        attribute = attributes.get(keyAttributeMapper.getAttributeName());
-                        if (attribute == null) {
-                            attribute = new BasicAttribute(keyAttributeMapper.getAttributeName());
-                        }
+                    attribute = getAttribute(attributes, keyAttributeMapper, keyName);
+                    if (keyAttributeMapper != null) {
+                        keyChildMap = keyAttributeMapper.getChildKeyAttributeMaps();
                     }
-                    attribute.getValues().add(result.get(keyName));
-                    attributes.put(attribute.getId(), attribute);
+
+                    if (keyChildMap != null && keyChildMap.size() > 0) {
+                        BasicDBObject dataMap = (BasicDBObject) result.get(keyName);
+                        for (MongoDbKeyAttributeMapper map : keyChildMap) {
+                            attribute = getAttribute(attributes, map, map.getAttributeName());
+                            attribute.getValues().add(dataMap.get(map.getMongoKey()));
+                            attributes.put(attribute.getId(), attribute);
+                        }
+                    } else if (result.get(keyName) instanceof com.mongodb.BasicDBList) {
+                        log.debug("Processing BasicDBList for {}.", keyName);
+                        BasicDBList res = (BasicDBList) result.get(keyName);
+                        List<String> resultList = new ArrayList<String>();
+                        for (Object s : res) {
+                            if (s instanceof BasicDBObject) {
+                                log.error("BasicDBObjects in embedded lists not supported");
+                                continue;
+                            }
+                            resultList.add((String) s);
+                        }
+                        attribute.getValues().addAll(resultList);
+                        attributes.put(attribute.getId(), attribute);
+                    } else {
+                        attribute.getValues().add(result.get(keyName));
+                        attributes.put(attribute.getId(), attribute);
+                    }
                 }
             }
         } catch (MongoException e) {
@@ -372,13 +382,39 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     }
 
     /**
+     * Gets a base attribute object.
+     *
+     * @param attributes the attribute list
+     * @param keyAttributeMapper the mongo db key attribute mapper
+     * @param keyName the attribute name
+     * @return base attribute
+     */
+    private BaseAttribute getAttribute(Map<String, BaseAttribute> attributes, MongoDbKeyAttributeMapper keyAttributeMapper, String keyName) {
+        BaseAttribute attribute;
+
+        if (keyAttributeMapper == null || keyAttributeMapper.getAttributeName() == null) {
+            attribute = attributes.get(keyName);
+            if (attribute == null) {
+                attribute = new BasicAttribute(keyName);
+            }
+        } else {
+            attribute = attributes.get(keyAttributeMapper.getAttributeName());
+            if (attribute == null) {
+                attribute = new BasicAttribute(keyAttributeMapper.getAttributeName());
+            }
+        }
+
+        return attribute;
+    }
+
+    /**
      * Derived from shibboleth storedId, Copyright [2007] [University Corporation for Advanced Internet Development, Inc.].
      *
      * Gets the currently active identifier for a (principal, peer, local) tuple.
      *
      * @param resolutionContext current resolution context
      * @return persistent ID
-     * @throws AttributeResolutionException
+     * @throws AttributeResolutionException if an error occurs when saving object to the database
      */
     private String getPersistentId(ShibbolethResolutionContext resolutionContext) throws AttributeResolutionException {
         SAMLProfileRequestContext requestContext = resolutionContext.getAttributeRequestContext();

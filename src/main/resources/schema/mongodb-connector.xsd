@@ -86,7 +86,15 @@
             <documentation>A description of a column in the result set from the query.</documentation>
         </annotation>
     </element>
+
     <complexType name="AttributeMapType">
+        <sequence>
+            <element name="ValueMap" type="uid:ValueMapType" minOccurs="0" maxOccurs="unbounded">
+                <annotation>
+                    <documentation>Option to map a hash based embedded document field to an attribute</documentation>
+                </annotation>
+            </element>
+        </sequence>
         <attribute name="mongoKey" type="string" use="required">
             <annotation>
                 <documentation>The name of the database key.</documentation>
@@ -98,6 +106,20 @@
             </annotation>
         </attribute>
     </complexType>
+
+    <complexType name="ValueMapType">
+        <attribute name="mongoKey" type="string" use="required">
+            <annotation>
+                <documentation>The name of the database key.</documentation>
+            </annotation>
+        </attribute>
+        <attribute name="attributeID" type="string">
+            <annotation>
+                <documentation>The name of the attribute that data from this column should be added to.</documentation>
+            </annotation>
+        </attribute>
+    </complexType>
+
     <element name="MongoHost" type="uid:MongoHostType">
         <annotation>
             <documentation>A description of a mongodb host connection.</documentation>

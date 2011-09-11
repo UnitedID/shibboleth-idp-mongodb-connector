@@ -93,7 +93,7 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         log.info("Data connector {} cache results: {}", pluginId, cacheResults);
         pluginBuilder.addPropertyValue("cacheResults", cacheResults);
 
-        List<ServerAddress> hosts = parseMongoHostNames(pluginId, pluginConfigChildren, pluginBuilder);
+        List<ServerAddress> hosts = parseMongoHostNames(pluginId, pluginConfigChildren);
         log.debug("Data connector {} hosts {}", pluginId, hosts.toString());
         pluginBuilder.addPropertyValue("mongoHost", hosts);
 
@@ -108,10 +108,10 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         log.info("Data connector {} running in persistentId mode: {}", pluginId, usePersistentId);
         pluginBuilder.addPropertyValue("usePersistentId", usePersistentId);
 
-        List<MongoDbKeyAttributeMapper> keyAttributeMaps = parseAttributeMappings(pluginId, pluginConfigChildren, pluginBuilder);
+        List<MongoDbKeyAttributeMapper> keyAttributeMaps = parseAttributeMappings(pluginId, pluginConfigChildren);
         pluginBuilder.addPropertyValue("keyAttributeMap", keyAttributeMaps);
 
-        if (usePersistentId == false) {
+        if (!usePersistentId) {
             String queryTemplate = pluginConfigChildren.get(QUERY_TEMPLATE_ELEMENT_NAME).get(0).getTextContent();
             queryTemplate = DatatypeHelper.safeTrimOrNullString(queryTemplate);
             log.debug("Data connector {} query template: {}", pluginId, queryTemplate);
@@ -125,14 +125,13 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
     /**
      * Parse mongodb Key entries
      *
+     *
      * @param pluginId the id of this connector
      * @param pluginConfigChildren configuration elements
-     * @param pluginBuilder the bean definition parser
      * @return the mongodb key attribute mappings
      */
     protected List<MongoDbKeyAttributeMapper> parseAttributeMappings(String pluginId,
-                                                                     Map<QName, List<Element>> pluginConfigChildren,
-                                                                     BeanDefinitionBuilder pluginBuilder) {
+                                                                     Map<QName, List<Element>> pluginConfigChildren) {
         List<MongoDbKeyAttributeMapper> keyAttributeMaps = new ArrayList<MongoDbKeyAttributeMapper>();
         MongoDbKeyAttributeMapper keyAttributeMap;
         String keyName;
@@ -142,6 +141,15 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
                 keyName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "mongoKey"));
                 attributeName = DatatypeHelper.safeTrimOrNullString(e.getAttributeNS(null, "attributeID"));
                 keyAttributeMap = new MongoDbKeyAttributeMapper(keyName, attributeName);
+                List<MongoDbKeyAttributeMapper> childMaps = new ArrayList<MongoDbKeyAttributeMapper>();
+                for (Element childElement : XMLHelper.getChildElementsByTagNameNS(e, UIDDataConnectorNamespaceHandler.NAMESPACE, "ValueMap")) {
+                    keyName = childElement.getAttributeNS(null, "mongoKey");
+                    attributeName = childElement.getAttributeNS(null, "attributeID");
+                    childMaps.add(new MongoDbKeyAttributeMapper(keyName, attributeName));
+                }
+                if (childMaps.size() > 0)
+                    keyAttributeMap.setChildKeyAttributeMaps(childMaps);
+
                 keyAttributeMaps.add(keyAttributeMap);
             }
             log.debug("Data connector {} key attribute maps: {}", pluginId, keyAttributeMaps);
@@ -154,12 +162,10 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
      *
      * @param pluginId the id of this connector
      * @param pluginConfigChildren configuration elements
-     * @param pluginBuilder the bean definition parser
      * @return the server addresses extracted from mongohost elements
      */
     protected List<ServerAddress> parseMongoHostNames(String pluginId,
-                                                      Map<QName, List<Element>> pluginConfigChildren,
-                                                      BeanDefinitionBuilder pluginBuilder) {
+                                                      Map<QName, List<Element>> pluginConfigChildren) {
         List<ServerAddress> hosts = new ArrayList<ServerAddress>();
         String host;
         int port;
