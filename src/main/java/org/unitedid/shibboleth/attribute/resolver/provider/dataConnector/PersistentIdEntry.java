@@ -47,6 +47,9 @@ public class PersistentIdEntry implements Serializable {
     /** Date and time when the persistent identifier was deactivated. */
     private Date deactivationTime;
 
+    /** Date and time when the persistent identifier was last used. */
+    private Date lastVisitTime;
+
     /** Constructor */
     public PersistentIdEntry() {
     }
@@ -175,5 +178,24 @@ public class PersistentIdEntry implements Serializable {
      */
     public void setDeactivationTime(Date date) {
         deactivationTime = date;
+    }
+
+
+    /**
+     * Gets the date and time when the persistent identifier was last updated
+     *
+     * @return date and time when the persistent identifier was last updated
+     */
+    public Date getLastVisitTime() {
+        return lastVisitTime;
+    }
+
+    /**
+     * Sets date and time when the persistent identifier was last updated
+     *
+     * @param date date and time when the persistent identifier was last updated
+     */
+    public void setLastVisitTime(Date date) {
+        lastVisitTime = date;
     }
 }

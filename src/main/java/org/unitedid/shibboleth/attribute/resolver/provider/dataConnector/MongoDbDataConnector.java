@@ -408,6 +408,12 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
                 entry.setLocalId((String) r.get("localId"));
                 entry.setCreationTime((Date) r.get("creationTime"));
                 entry.setDeactivationTime((Date) r.get("deactivationTime"));
+                entry.setLastVisitTime(new Date());
+
+                // Update last visit time
+                BasicDBObject updateQuery = new BasicDBObject("$set", new BasicDBObject("lastVisitTime", entry.getLastVisitTime()));
+                collection.update(r, updateQuery);
+
                 entries.add(entry);
             }
 
@@ -439,9 +445,8 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      * @param localId principal the persistent ID represents
      * @param salt salt used when generating a persistent ID via SHA-1 hash
      * @return persistent ID entry
-     * @throws MongoException
      */
-    protected PersistentIdEntry createPersistentId(ShibbolethResolutionContext resolutionContext, String localId, byte[] salt) throws MongoException {
+    protected PersistentIdEntry createPersistentId(ShibbolethResolutionContext resolutionContext, String localId, byte[] salt) {
         PersistentIdEntry persistentIdEntry = new PersistentIdEntry();
         persistentIdEntry.setPeerEntityId(resolutionContext.getAttributeRequestContext().getPeerEntityId());
         persistentIdEntry.setLocalEntityId(resolutionContext.getAttributeRequestContext().getLocalEntityId());
@@ -461,13 +466,14 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
                 persistentId = Base64.encodeBytes(md.digest(salt));
             } catch (NoSuchAlgorithmException e) {
                 log.error("JVM error, SHA-1 is not supported, unable to generate ID");
-                throw new MongoException("SHA-1 is not supported, unable to generate ID");
+                throw new RuntimeException(e);
             }
         } else {
             persistentId = UUID.randomUUID().toString();
         }
         persistentIdEntry.setPersistentId(persistentId);
         persistentIdEntry.setCreationTime(new Date());
+        persistentIdEntry.setLastVisitTime(new Date());
 
         return persistentIdEntry;
     }
@@ -487,6 +493,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
             query.put("localId", entry.getLocalId());
             query.put("persistentId", entry.getPersistentId());
             query.put("creationTime", entry.getCreationTime());
+            query.put("lastVisitTime", entry.getLastVisitTime());
 
             collection.insert(query);
 
@@ -503,7 +510,7 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      *
      * @param resolutionContext current resolution context
      * @return local ID component of the persistent ID
-     * @throws AttributeResolutionException thrown if there is a problem resolving the local id
+     * @throws AttributeResolutionException if there is a problem resolving the local id
      */
     protected String getLocalId(ShibbolethResolutionContext resolutionContext) throws AttributeResolutionException {
         Collection<Object> sourceIdValues = getValuesFromAllDependencies(resolutionContext, getPidSourceAttributeId());
