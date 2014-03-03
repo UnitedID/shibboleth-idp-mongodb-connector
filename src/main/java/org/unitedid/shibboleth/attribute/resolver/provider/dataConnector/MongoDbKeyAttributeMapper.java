@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 
 package org.unitedid.shibboleth.attribute.resolver.provider.dataConnector;
@@ -23,6 +22,8 @@ import java.util.List;
 
 /**
  * A mapping class between mongo document keys and shibboleth attributes
+ *
+ * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 public class MongoDbKeyAttributeMapper {
 
