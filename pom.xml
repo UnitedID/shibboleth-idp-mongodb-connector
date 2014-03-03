@@ -2,7 +2,7 @@
 
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <groupId>edu.internet2.middleware</groupId>
+  <groupId>org.unitedid</groupId>
   <artifactId>mongodb-connector</artifactId>
   <version>1.2.0-dev</version>
   <packaging>jar</packaging>
@@ -36,37 +36,59 @@
     <url>http://unitedid.org/</url>
   </organization>
 
-  <repositories>
-    <repository>
-      <id>shibboleth.internet2.edu</id>
-      <name>Internet2</name>
-      <layout>default</layout>
-      <url>http://shibboleth.internet2.edu/downloads/maven2</url>
-      <releases>
-        <updatePolicy>always</updatePolicy>
-      </releases>
-      <snapshots>
-        <enabled>false</enabled>
-      </snapshots>
-    </repository>
-  </repositories>
-
   <dependencies>
     <!-- Compile dependencies -->
     <dependency>
       <groupId>org.mongodb</groupId>
       <artifactId>mongo-java-driver</artifactId>
-      <version>2.6.5</version>
+      <version>2.11.4</version>
       <scope>compile</scope>
     </dependency>
 
+
     <!-- Provided dependencies -->
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-core</artifactId>
+      <version>2.5.6.SEC03</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-beans</artifactId>
+      <version>2.5.6.SEC03</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>org.springframework</groupId>
+      <artifactId>spring-web</artifactId>
+      <version>2.5.6.SEC02</version>
+      <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+       <groupId>org.opensaml</groupId>
+       <artifactId>opensaml</artifactId>
+       <version>2.6.0</version>
+       <scope>provided</scope>
+    </dependency>
+
+    <dependency>
+      <groupId>edu.internet2.middleware</groupId>
+      <artifactId>shibboleth-common</artifactId>
+      <version>1.4.0</version>
+      <scope>provided</scope>
+    </dependency>
+
     <dependency>
       <groupId>edu.internet2.middleware</groupId>
       <artifactId>shibboleth-identityprovider</artifactId>
-      <version>2.2.1</version>
+      <version>2.4.0</version>
       <scope>provided</scope>
     </dependency>
+
     <dependency>
       <groupId>javax.servlet</groupId>
       <artifactId>servlet-api</artifactId>
@@ -74,10 +96,17 @@
       <scope>provided</scope>
     </dependency>
 
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>1.7.5</version>
+      <scope>provided</scope>
+    </dependency>
+
+
     <!-- Runtime dependencies -->
 
     <!-- Test dependencies -->
-
   </dependencies>
 
   <build>

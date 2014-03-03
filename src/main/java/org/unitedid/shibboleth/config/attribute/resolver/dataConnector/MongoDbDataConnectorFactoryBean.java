@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 
 package org.unitedid.shibboleth.config.attribute.resolver.dataConnector;
@@ -31,6 +30,8 @@ import java.util.Map;
 
 /**
  * Spring factory for creating {@link MongoDbDataConnector} beans.
+ *
+ * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBean {
 
@@ -58,6 +59,9 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
     /** Password */
     private String mongoPassword;
 
+    /** Preferred read preference for MongoDB */
+    private String preferredRead;
+
     /** Whether the query results should be cached */
     private boolean cacheResults;
 
@@ -73,9 +77,6 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
     /** ID of the attribute whose first value  is used when generating a persistent ID. */
     private String pidSourceAttributeId;
 
-    /** Salt used when generating the persistent ID. */
-    private byte[] pidSalt;
-
     /** {@inheritDoc} */
     protected Object createInstance() throws Exception {
         log.debug("MongoDbDataConnectorFactoryBean createInstance");
@@ -84,8 +85,9 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
         connector.setQueryTemplate(getQueryTemplate());
         connector.setTemplateEngine(getTemplateEngine());
         connector.setCacheResults(isCacheResults());
+        connector.setPreferredRead(getPreferredRead());
 
-        if (mongoUser != null) {
+        if (getMongoUser() != null && getMongoPassword() != null) {
             connector.setMongoUser(getMongoUser());
             connector.setMongoPassword(getMongoPassword());
         }
@@ -94,7 +96,6 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
             connector.setPersistentId(isPersistentId());
             connector.setPidGeneratedAttributeId(getPidGeneratedAttributeId());
             connector.setPidSourceAttributeId(getPidSourceAttributeId());
-            connector.setPidSalt(getPidSalt());
         }
 
         if (getKeyAttributeMap() != null) {
@@ -331,21 +332,20 @@ public class MongoDbDataConnectorFactoryBean extends BaseDataConnectorFactoryBea
     }
 
     /**
-     * Gets the salt used when generating the persistent ID.
+     * Gets the mongodb read preference type
      *
-     * @return the salt used when generating the persistent ID
+     * @return the mongodb read preference type
      */
-    public byte[] getPidSalt() {
-        return pidSalt;
+    public String getPreferredRead() {
+        return preferredRead;
     }
 
     /**
-     * Sets the salt used when generating the persistent ID.
-     * Provided salt must be at least 16 bytes in size.
+     * Sets the mongodb read preference type
      *
-     * @param salt the salt used when generating the persistent ID
+     * @param prefRead the mongodb read preference type
      */
-    public void setPidSalt(byte[] salt) {
-        pidSalt = salt;
+    public void setPreferredRead(String prefRead) {
+        preferredRead = prefRead;
     }
 }

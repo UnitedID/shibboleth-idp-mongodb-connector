@@ -67,6 +67,9 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
                            BeanDefinitionBuilder pluginBuilder, ParserContext parserContext) {
         super.doParse(pluginId, pluginConfig, pluginConfigChildren, pluginBuilder, parserContext);
 
+        /**
+         * Data connector attributes (<resolver:DataConnector attr1="" attr2=""></resolver:DataConnector>)
+         */
         String mongoDbName = pluginConfig.getAttributeNS(null, "mongoDbName");
         log.info("Data connector {} MONGODB DATABASE: {}", pluginId, mongoDbName);
         pluginBuilder.addPropertyValue("mongoDbName", mongoDbName);
@@ -86,6 +89,13 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
             pluginBuilder.addPropertyValue("mongoPassword", mongoPassword);
         }
 
+        String preferredRead = "primaryPreferred";
+        if (pluginConfig.hasAttributeNS(null, "preferredRead")) {
+            preferredRead = pluginConfig.getAttributeNS(null, "preferredRead");
+        }
+        log.info("Data connector {} preferredRead type: {}", pluginId, preferredRead);
+        pluginBuilder.addPropertyValue("preferredRead", preferredRead);
+
         boolean cacheResults = false;
         if (pluginConfig.hasAttributeNS(null, "cacheResults")) {
             cacheResults = XMLHelper.getAttributeValueAsBoolean(pluginConfig.getAttributeNodeNS(null, "cacheResults"));
@@ -93,6 +103,9 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
         log.info("Data connector {} cache results: {}", pluginId, cacheResults);
         pluginBuilder.addPropertyValue("cacheResults", cacheResults);
 
+        /**
+         * Mongodb host entries (<uid:MongoHost host="" port="" />)
+         */
         List<ServerAddress> hosts = parseMongoHostNames(pluginId, pluginConfigChildren);
         log.debug("Data connector {} hosts {}", pluginId, hosts.toString());
         pluginBuilder.addPropertyValue("mongoHost", hosts);

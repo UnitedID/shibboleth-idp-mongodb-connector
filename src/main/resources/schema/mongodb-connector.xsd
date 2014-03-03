@@ -65,6 +65,13 @@
                         </documentation>
                     </annotation>
                 </attribute>
+                <attribute name="preferredRead" type="string">
+                    <annotation>
+                        <documentation>
+                            Set preferred read method for the mongo database connection. Possible values are: primary, primaryPreferred, secondary, secondaryPreferred and nearest.
+                        </documentation>
+                    </annotation>
+                </attribute>
                 <attribute name="cacheResults" type="boolean">
                     <annotation>
                         <documentation>

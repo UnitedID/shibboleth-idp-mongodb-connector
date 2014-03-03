@@ -62,6 +62,18 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     /** Password */
     private String mongoPassword;
 
+    /** Preferred read preference valid values */
+    private static final Map<String, ReadPreference> MONGO_READ_PREF = Collections.unmodifiableMap(new HashMap<String, ReadPreference>() {{
+        put("primary", ReadPreference.primary());
+        put("primaryPreferred", ReadPreference.primaryPreferred());
+        put("secondary", ReadPreference.secondary());
+        put("secondaryPreferred", ReadPreference.secondaryPreferred());
+        put("nearest", ReadPreference.nearest());
+    }});
+
+    /** Preferred read preference for MongoDB */
+    private String preferredRead;
+
     /** Whether the query results should be cached */
     private boolean cacheResults;
 
@@ -125,22 +137,18 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
         if (initialized) {
             log.debug("MongoDB connector initializing!");
             Mongo mongoCon = new Mongo(mongoHost);
+            mongoCon.setReadPreference(getPreferredRead());
             db = mongoCon.getDB(mongoDbName);
 
-            if (mongoUser != null) {
-                boolean dbAuth = db.authenticate(mongoUser, mongoPassword.toCharArray());
+            if (getMongoUser() != null && getMongoPassword() != null) {
+                boolean dbAuth = db.authenticate(getMongoUser(), getMongoPassword().toCharArray());
                 if (!dbAuth) {
                     log.error("MongoDB data connector {} authentication failed for database {}, username or password!", getId(), mongoDbName);
                     throw new MongoException("MongoDB data connector " + getId() + " authentication failed!");
                 } else {
-                    log.debug("MongoDB data connector {} authentication successfull!", getId());
+                    log.debug("MongoDB data connector {} authentication successful!", getId());
                 }
             }
-            // Ok to read from slave if at least three servers are configured (replica set)
-            if (mongoHost.size() > 2) {
-                mongoCon.slaveOk();
-            }
-
         }
     }
 
@@ -612,6 +620,32 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
      */
     public void setMongoPassword(String password) {
         mongoPassword = password;
+    }
+
+    /**
+     * Gets preferred read method for MongoDB.
+     * Defaults to primaryPreferred.
+     *
+     * @return a ReadPreference
+     */
+    public ReadPreference getPreferredRead() {
+        if (preferredRead != null && !preferredRead.isEmpty()) {
+            return MONGO_READ_PREF.get(preferredRead);
+        }
+        return ReadPreference.primaryPreferred();
+    }
+
+    /**
+     * Sets the preferred read method for MongoDB.
+     *
+     * @param prefRead the preferred read keyword
+     */
+    public void setPreferredRead(String prefRead) {
+        if (MONGO_READ_PREF.containsKey(prefRead)) {
+            preferredRead = prefRead;
+        } else {
+            throw new IllegalArgumentException("Invalid value '" + prefRead + "'. Valid values are: " + MONGO_READ_PREF.keySet().toString());
+        }
     }
 
     /**
