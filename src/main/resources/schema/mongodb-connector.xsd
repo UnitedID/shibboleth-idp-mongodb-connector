@@ -13,7 +13,7 @@
 
     <annotation>
         <documentation>
-            This schema specifies the configuration additions for MongoDB connector plugins
+            This schema specifies the configuration additions for MongoDB connector plugins.
         </documentation>
     </annotation>
 
@@ -154,13 +154,6 @@
             <annotation>
                 <documentation>
                     The name of the attribute which should be used to as input to the ...
-                </documentation>
-            </annotation>
-        </attribute>
-        <attribute name="salt" type="string" use="required">
-            <annotation>
-                <documentation>
-                    A salt, of at least 16 bytes, used in the persistant Id
                 </documentation>
             </annotation>
         </attribute>

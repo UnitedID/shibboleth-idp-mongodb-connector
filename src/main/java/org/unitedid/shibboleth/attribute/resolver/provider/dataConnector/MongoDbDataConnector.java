@@ -13,7 +13,6 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  *
- * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 
 package org.unitedid.shibboleth.attribute.resolver.provider.dataConnector;
@@ -28,18 +27,17 @@ import edu.internet2.middleware.shibboleth.common.attribute.resolver.provider.da
 import edu.internet2.middleware.shibboleth.common.attribute.resolver.provider.dataConnector.TemplateEngine;
 import edu.internet2.middleware.shibboleth.common.profile.provider.SAMLProfileRequestContext;
 import edu.internet2.middleware.shibboleth.common.session.LogoutEvent;
-import org.opensaml.xml.util.Base64;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationEvent;
 import org.springframework.context.ApplicationListener;
 
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
 
 /**
  * <code>MongoDbDataConnector</code> provides a plugin to fetch attributes from a mongo database.
+ *
+ * @author Stefan Wold <stefan.wold@unitedid.org>
  */
 public class MongoDbDataConnector extends BaseDataConnector implements ApplicationListener {
 
@@ -93,10 +91,6 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
 
     /** ID of the attribute whose first value  is used when generating a persistent ID. */
     private String pidSourceAttributeId;
-
-    /** Salt used when generating the persistent ID. */
-    private byte[] pidSalt;
-
 
     /**
      * Constructor
@@ -455,59 +449,33 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
 
             if (entries == null || entries.size() == 0) {
                 log.debug("Data connector {} did not find a persistentId for principal: {}, generating a new one.", getId(), localId);
-                entry = createPersistentId(resolutionContext, localId, pidSalt);
+                entry = createPersistentId(resolutionContext, localId);
                 savePersistentId(entry);
                 entries.add(entry);
             }
         } catch (MongoException e) {
-            log.error("Mongodb query failed", e);
+            log.error("MongoDB query failed", e);
         }
 
         return entries.get(0).getPersistentId();
     }
 
     /**
-     * Derived from shibboleth storedId, Copyright [2007] [University Corporation for Advanced Internet Development, Inc.].
-     *
      * Creates a persistent ID that is unique for a given local/peer/localId tuple.
      *
-     * If an ID has never been issued for to the given tuple then an ID is created by taking a SHA-1 hash of the peer's
-     * entity ID, the local ID, and a salt. This is to ensure compatability with IDs created by the now deprecated
-     * ComputedIDDataConnector.
-     *
-     * If an ID has been issued to the given tuple than a new, random type 4 UUID is generated as the persistent ID.
+     * A random type 4 UUID is generated as the persistent ID.
      *
      * @param resolutionContext current resolution context
      * @param localId principal the persistent ID represents
-     * @param salt salt used when generating a persistent ID via SHA-1 hash
      * @return persistent ID entry
      */
-    protected PersistentIdEntry createPersistentId(ShibbolethResolutionContext resolutionContext, String localId, byte[] salt) {
+    protected PersistentIdEntry createPersistentId(ShibbolethResolutionContext resolutionContext, String localId) {
         PersistentIdEntry persistentIdEntry = new PersistentIdEntry();
         persistentIdEntry.setPeerEntityId(resolutionContext.getAttributeRequestContext().getPeerEntityId());
         persistentIdEntry.setLocalEntityId(resolutionContext.getAttributeRequestContext().getLocalEntityId());
         persistentIdEntry.setPrincipalName(resolutionContext.getAttributeRequestContext().getPrincipalName());
         persistentIdEntry.setLocalId(localId);
-
-        String persistentId;
-        int entries = getNumberOfPersistentIdEntries(persistentIdEntry.getLocalEntityId(), persistentIdEntry.getPeerEntityId(), persistentIdEntry.getLocalId());
-
-        if (entries == 0) {
-            try {
-                MessageDigest md = MessageDigest.getInstance("SHA");
-                md.update(persistentIdEntry.getPeerEntityId().getBytes());
-                md.update((byte) '!');
-                md.update(localId.getBytes());
-                md.update((byte) '!');
-                persistentId = Base64.encodeBytes(md.digest(salt));
-            } catch (NoSuchAlgorithmException e) {
-                log.error("JVM error, SHA-1 is not supported, unable to generate ID");
-                throw new RuntimeException(e);
-            }
-        } else {
-            persistentId = UUID.randomUUID().toString();
-        }
-        persistentIdEntry.setPersistentId(persistentId);
+        persistentIdEntry.setPersistentId(UUID.randomUUID().toString());
         persistentIdEntry.setCreationTime(new Date());
         persistentIdEntry.setLastVisitTime(new Date());
 
@@ -754,27 +722,4 @@ public class MongoDbDataConnector extends BaseDataConnector implements Applicati
     public void setPidSourceAttributeId(String attributeId) {
         pidSourceAttributeId = attributeId;
     }
-
-    /**
-     * Gets the salt used when generating the persistent ID.
-     *
-     * @return the salt used when generating the persistent ID
-     */
-    public byte[] getPidSalt() {
-        return pidSalt;
-    }
-
-    /**
-     * Sets the salt used when generating the persistent ID.
-     * Provided salt must be at least 16 bytes in size.
-     *
-     * @param salt the salt used when generating the persistent ID
-     */
-    public void setPidSalt(byte[] salt) {
-        if (salt.length < 16) {
-            throw new IllegalArgumentException("Provided salt must be at least 16 bytes in size");
-        }
-        pidSalt = salt;
-    }
-
 }

@@ -102,7 +102,6 @@ public class MongoDbDataConnectorBeanDefinitionParser extends BaseDataConnectorB
             Element e = pluginConfigChildren.get(PID_ELEMENT_NAME).get(0);
             pluginBuilder.addPropertyValue("pidGeneratedAttributeId", e.getAttributeNS(null, "generatedAttributeId"));
             pluginBuilder.addPropertyValue("pidSourceAttributeId", e.getAttributeNS(null, "sourceAttributeId"));
-            pluginBuilder.addPropertyValue("pidSalt", e.getAttributeNS(null, "salt").getBytes());
             usePersistentId = true;
         }
         log.info("Data connector {} running in persistentId mode: {}", pluginId, usePersistentId);
