@@ -156,8 +156,7 @@ Enable the mongodb connector in $IDP_CONFIG_DIR/conf/attribute-resolver.xml
       <uid:MongoHost host="server3.example.com" port="27017" />
 
       <uid:PersistentId generatedAttributeId="persistentID"
-                        sourceAttributeId="uid"
-                        salt="1q2w3e4r5t56y678dcfvgbhynujtywrtqrecadaqqwe243" />
+                        sourceAttributeId="uid" />
     </resolver:DataConnector>
 
 
